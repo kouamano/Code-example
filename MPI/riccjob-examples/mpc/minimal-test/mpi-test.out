@@ -1,0 +1,12 @@
+prog:mpi-test:
+rank:0:
+p:4:
+prog:mpi-test:
+rank:1:
+p:4:
+prog:mpi-test:
+rank:2:
+p:4:
+prog:mpi-test:
+rank:3:
+p:4:

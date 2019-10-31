@@ -1,0 +1,14 @@
+#!/bin/sh
+
+#MJS: -pc
+#MJS: -proc 4
+#MJS: -thread 1
+#MJS: -cwd
+#MJS: -time 1:00:00
+
+
+#BEFORE: mpi-test
+
+#AFTER: mpi-test.out
+
+mpirun ./mpi-test > mpi-test.out

@@ -1,0 +1,28 @@
+#コンパイル
+mpicc -pc mpi-test.c -o mpi-test
+#下はエラー
+cc -pc mpi-test.c -o mpi-test
+
+#サブミットファイル
+mpi-test.sbm
+
+#サブミット
+qsub mpi-test.sbm
+#アウトプットファイル
+mpi-test.out
+#内容:
+rank:0:
+p:4:
+prog:mpi-test:
+rank:3:
+p:4:
+prog:mpi-test:
+rank:2:
+p:4:
+prog:mpi-test:
+rank:1:
+p:4:
+
+
+#インタラクティブジョブ
+mpirun -np 4 ./mpi-test
