@@ -1,0 +1,19 @@
+# original 以下失敗
+# gcc -o a.out eig_clapack.c -L/usr/lib -lclapack_LINUX -lctmglib_LINUX -L/usr/atlas/lib -lptf77blas -latlas -lf2c -lpthread -lm
+# gcc7.3 以下成功、libgslのシンボル解決はlibgslcblasのものでないと解決できない?
+# libcblas_LINUXにもシンボルがあるが。。。
+gcc -o a.out eig_clapack.c \
+-L/usr/local/lib/lapack/CLAPACK-3.2.1 -lclapack_LINUX \
+ -lctmglib_LINUX \
+-L/usr/lib64/atlas -lptf77blas \
+ -latlas \
+-L/usr/local/lib/lapack/CLAPACK-3.2.1 -lf2c \
+-L/usr/lib64 -lgsl \
+-lgslcblas \
+-L/usr/local/lib/blas/CBLAS-3.8.0 -lcblas_LINUX \
+ -lpthread \
+ -lm
+# gcc4.4 以下検証中、ctmgがない。
+#gcc44 -o a.out eig_clapack.c -L/usr/local/lib/lapack/3.8.0 -lclapack -L/usr/local/lib/lapack/CLAPACK-3.2.1 -lctmglib_LINUX -L/usr/lib64/atlas -lcblas -L/usr/atlas/lib -lptf77blas -latlas -lf2c -lpthread -lm
+# gcc7.3 以下検証中、ctmgがない。
+#gcc -o a.out eig_clapack.c -L/usr/lib64/atlas -lclapack -lctmglib_LINUX -L/usr/atlas/lib -lptf77blas -latlas -lf2c -lpthread -lm

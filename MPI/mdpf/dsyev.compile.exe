@@ -1,0 +1,3 @@
+# www-cms.phy.s.u0tokyo.ac.jp/~naoki/CIPINTRO/LAPACK
+# 以下成功
+g++ dsyev.cc -llapack -lblas -lm

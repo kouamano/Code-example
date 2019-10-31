@@ -1,0 +1,4 @@
+# 以下コンパイル成功
+gcc44 lin_eq.c -llapack -lblas -lgfortran -lm
+# 以下コンパイル失敗
+# gcc lin_eq.c -llapack -lblas -lgfortran -lm

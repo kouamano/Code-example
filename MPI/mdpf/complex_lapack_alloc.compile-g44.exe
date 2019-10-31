@@ -1,0 +1,9 @@
+# 以下成功
+gcc44 -o complex_lapack_alloc.o complex_lapack_alloc.c -llapack -lblas -lm
+# 以下失敗
+#gcc complex_lapack.c -L/usr/local/lib/lapack/3.8.0 -llapack -L/usr/local/lib/blas/3.8.0/CBLAS -lcblas_LINUX -lm
+#バイナリは以下をかえす
+#1番目の固有値:1.000 -1.000*I
+#1番目の固有ベクトル:(0.894 +0.000*I -0.447 -0.000*I)
+#2番目の固有値:1.000 +2.000*I
+#2番目の固有ベクトル:(0.707 +0.000*I 0.707 -0.000*I)

@@ -1,0 +1,6 @@
+# from https://people.sc.fsu.edu/~jburkardt/c_src/test_eigen/test_eigen.html
+# 必要ファイル: test_eigen.c test_eigen.h test_eigen_test.c
+# 想定出力: test_eigen_test.txt
+# 以下成功
+gcc44 -c test_eigen.c -llapack -lblas -lm
+gcc44 test_eigen_test.c test_eigen.o -llapack -lblas -lm

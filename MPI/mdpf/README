@@ -1,0 +1,17 @@
+# コンパイルテストまとめ
+
+## How to compile
+## compile コマンドをスクリプト　化
+*.c	*.compile.exe
+
+## 状況
+コンパイル			成功	実行成功
+complex_lapack.compile-g44.exe	1	1
+complex_lapack.compile.exe	0	0
+dsyev.compile.exe		1	1
+eig_clapack.compile.exe		1	0(セグメンテーション違反)
+lin_eq.compile.exe		1	1
+test_eigen_test.compile.exe	1	1
+
+## mdpf cluster
+complex_lapack_alloc.compile-g48.dpf.exe
