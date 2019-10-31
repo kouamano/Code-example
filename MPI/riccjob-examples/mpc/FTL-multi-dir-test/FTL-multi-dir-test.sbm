@@ -1,0 +1,18 @@
+#!/bin/sh
+
+#FTL_STAT: detail
+#FTL_INFO: all
+
+#MJS: -mpc
+#MJS: -proc 4
+#MJS: -cwd
+#MJS: -time 1:00:00
+
+#BEFORE: data/data.$MPI_RANK
+#BEFORE: bin/a.out
+
+#!<RUN>
+mpirun ./bin/a.out
+#!</RUN>
+
+#AFTER: *@results: data.$MPI_RANK.out

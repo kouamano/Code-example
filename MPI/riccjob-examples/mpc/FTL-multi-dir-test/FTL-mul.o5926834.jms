@@ -1,0 +1,41 @@
+#======================  FTL STATISTICS INFOMATION  ===========================#
+-----------------------          BEFORE             ----------------------------
+                 ELAPSE(s)    FILE_NUM  FILE_SIZE(KB)
+--------------------------------------------------------------------------------
+TOTAL                    0           5             12
+RANK: 0-3                0           5             12
+
+-----------------------          AFTER              ----------------------------
+                 ELAPSE(s)    FILE_NUM  FILE_SIZE(KB)
+--------------------------------------------------------------------------------
+TOTAL                    0           4              0
+RANK: 0-3                0           4              0
+
+#==============================================================================#
+#======================     FTL FILE INFOMATION     ===========================#
+-----------------------          BEFORE             ----------------------------
+[RANK: 0-3]
+TIME              SIZE(KB) FILE_NAME
+--------------------------------------------------------------------------------
+Oct 19 11:58            12 /home/amano/riccjob-examples/mpc/FTL-multi-dir-test/bin/a.out
+Oct 19 11:47             0 /home/amano/riccjob-examples/mpc/FTL-multi-dir-test/data/data.0
+Oct 19 11:47             0 /home/amano/riccjob-examples/mpc/FTL-multi-dir-test/data/data.1
+Oct 19 11:48             0 /home/amano/riccjob-examples/mpc/FTL-multi-dir-test/data/data.2
+Oct 19 11:48             0 /home/amano/riccjob-examples/mpc/FTL-multi-dir-test/data/data.3
+
+
+-----------------------          AFTER              ----------------------------
+[RANK: 0-3]
+TIME              SIZE(KB) FILE_NAME
+--------------------------------------------------------------------------------
+10月 19 11:58          12 /home/amano/riccjob-examples/mpc/FTL-multi-dir-test/bin/a.out
+11月 01 13:38           0 /home/amano/riccjob-examples/mpc/FTL-multi-dir-test/data.0.out
+11月 01 13:38           0 /home/amano/riccjob-examples/mpc/FTL-multi-dir-test/data.1.out
+11月 01 13:38           0 /home/amano/riccjob-examples/mpc/FTL-multi-dir-test/data.2.out
+11月 01 13:38           0 /home/amano/riccjob-examples/mpc/FTL-multi-dir-test/data.3.out
+10月 19 11:47           0 /home/amano/riccjob-examples/mpc/FTL-multi-dir-test/data/data.0
+10月 19 11:47           0 /home/amano/riccjob-examples/mpc/FTL-multi-dir-test/data/data.1
+10月 19 11:48           0 /home/amano/riccjob-examples/mpc/FTL-multi-dir-test/data/data.2
+10月 19 11:48           0 /home/amano/riccjob-examples/mpc/FTL-multi-dir-test/data/data.3
+
+#==============================================================================#
