@@ -1,0 +1,28 @@
+-----
+[0/4]sample dimensions:4:
+[0/4]num samples:12:
+
+-----
+-----
+[3/4]sample dimensions:4:
+[3/4]num samples:10:
+
+-----
+[0/4] 12 15 17 10
+END
+[3/4] 12 15 17 10
+END
+-----
+[2/4]sample dimensions:4:
+[2/4]num samples:17:
+
+-----
+-----
+[1/4]sample dimensions:4:
+[1/4]num samples:15:
+
+-----
+[2/4] 12 15 17 10
+END
+[1/4] 12 15 17 10
+END

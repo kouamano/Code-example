@@ -1,0 +1,17 @@
+#!/bin/sh
+
+#MJS: -pc
+#MJS: -proc 4
+#MJS: -thread 1
+#MJS: -cwd
+#MJS: -time 1:00:00
+
+
+#BEFORE: 0:mpi_solve-centroid-multifile,f.0
+#BEFORE: 1:mpi_solve-centroid-multifile,f.1
+#BEFORE: 2:mpi_solve-centroid-multifile,f.2
+#BEFORE: 3:mpi_solve-centroid-multifile,f.3
+
+#AFTER: mpi_solve-centroid-multifile.out
+
+mpirun ./mpi_solve-centroid-multifile f > mpi_solve-centroid-multifile.out
