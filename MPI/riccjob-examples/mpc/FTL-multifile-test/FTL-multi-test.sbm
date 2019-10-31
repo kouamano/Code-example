@@ -1,0 +1,17 @@
+#!/bin/sh
+
+#MJS: -pc
+#MJS: -proc 4
+#MJS: -thread 1
+#MJS: -cwd
+#MJS: -time 1:00:00
+
+
+#BEFORE: 0:FTL-multi-test,f.0
+#BEFORE: 1:FTL-multi-test,f.1
+#BEFORE: 2:FTL-multi-test,f.2
+#BEFORE: 3:FTL-multi-test,f.3
+
+#AFTER: FTL-multi-test.out
+
+mpirun ./FTL-multi-test f > FTL-multi-test.out
