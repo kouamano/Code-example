@@ -1,0 +1,12 @@
+<root>
+  <head>
+  </head>
+  <body>
+    <background sec-type="results">222 </background>
+    <sec sec-type="results">222 </sec>
+    <sec sec-type="Results">232</sec>
+    <sec sec-type="result">242</sec>
+    <sec sec-type="materials">243</sec>
+    <sec sec-type="results">FFF<sec sec-type="results">252</sec>LLL</sec>
+  </body>
+</root>
