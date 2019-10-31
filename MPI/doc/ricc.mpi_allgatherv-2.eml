@@ -1,0 +1,113 @@
+----------- Original Message ------------
+ Subject: Re: (riken-hpc:235526) MPI_Allgatherv()
+ Date: Tue, 13 Sep 2011 16:07:47 +0900
+ From: Yukiya Aoyama <@riken.jp>
+ To: amano@brc.riken.jp
+ Cc:
+
+ 天野様
+
+ >1. mpi_reccount_listの解釈
+ >全てのランクから合計4つの値をもらうので、
+ >すべてのランクで、4と設定しましたが、
+ >正しいでしょうか。
+
+ 例えば4プロセスで実行する場合
+ ランク0が送る要素数(=1)を mpi_reccount_list[0]に、
+ 　　：
+ ランク3が送る要素数(=1)を mpi_reccount_list[3]に設定します。、
+ 従って、配列の各要素には1を設定します。
+
+ >2. mpi_displsの解釈
+ >i番目のランクからもらう値をi番目に書き込むので、
+ >[i] = i としましたが、正しいでしょうか。
+
+ 今回は、各プロセスが１要素を送るので、正しいです。
+
+ >3. 全てのランクで完全にgatherできたあとに
+ >printf()して確かめたいのですが、どのように
+ >すれば、よいでしょうか。
+
+ 普通にprintf()で出力されます。
+ ランク0だけに出力させたい場合は、
+ if (mpi_rank==0) printf();　とします。
+
+
+ 下記にサンプルプログラムと実行結果を添付します。
+ ランク0,1,2,3が、100,101,102,103を送信する例です。
+
+ なお、今回のように、送信データの数が全プロセスで同じで、
+ ランクの値が小さい方から順に受信バッファーに入れる場合は、
+ 通常下記のようにMPI_Allgatherを使用します。
+
+          MPI_Allgather(&mpi_num, 1, MPI_INT, mpi_num_list, 1, MPI_INT,
+MPI_COMM_WORLD );
+
+
+ ■コンパイル・実行
+
+ mpicc -pc TEST.c;mpirun -np 4 a.out
+
+ mpi_rank= 0 : 100 101 102 103
+ mpi_rank= 1 : 100 101 102 103
+ mpi_rank= 2 : 100 101 102 103
+ mpi_rank= 3 : 100 101 102 103
+
+
+ ■プログラム(TEST.c)
+
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <mpi.h>
+ #include "/home/amano/include/alloc.c"
+ #include "/home/amano/include/data_read.c"
+
+ int main(int argc, char **argv){
+          int i;
+          int mpi_rank;
+          int mpi_size;
+          int mpi_num = 0;
+          int *mpi_num_list;
+          int *mpi_reccount_list;
+          int *mpi_displs;
+
+          MPI_Init(&argc, &argv);
+          MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+          MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+          mpi_num_list = i_alloc_vec(mpi_size);
+
+          mpi_reccount_list = i_alloc_vec(mpi_size);
+
+          mpi_displs = i_alloc_vec(mpi_size);
+
+          for(i=0;i<mpi_size;i++){
+                  mpi_reccount_list[i] = 1;
+          }
+          for(i=0;i<mpi_size;i++){
+                  mpi_displs[i] = i;
+          }
+ 　      mpi_num = 100 + mpi_rank;
+          MPI_Allgatherv(&mpi_num, 1, MPI_INT, mpi_num_list,
+ mpi_reccount_list, mpi_displs, MPI_INT, MPI_COMM_WORLD );
+ 　       printf("mpi_rank= %d : %d %d %d
+ %d\n",mpi_rank,mpi_num_list[0],mpi_num_list[1],mpi_num_list[2],mpi_num_list[3]);
+
+          MPI_Finalize();
+
+ }
+
+
+ -------- End of Original Message --------
+
+ /**********************************
+  独立行政法人理化学研究所筑波研究所
+  バイオリソースセンター 情報解析技術室
+  天野　晃 (AMANO, Kou)
+  〒305-0074 茨城県つくば市高野台3-1-1
+  Tel(研究室代表): 029-836-9115
+  内線: 8304
+  e-mail: amano@brc.riken.jp
+  URL:http://www.brc.riken.jp/
+ **********************************/

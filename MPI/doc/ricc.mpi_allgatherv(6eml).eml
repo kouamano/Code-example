@@ -1,0 +1,559 @@
+=================1====================
+----------- Original Message ------------
+ Subject: Re: MPI_Allgatherv() の行列
+ Date: Tue, 20 Sep 2011 20:49:09 +0900
+ From: Yukiya Aoyama <@riken.jp>
+ To: amano <amano@brc.riken.jp>
+ Cc:
+
+ 天野様
+
+ エラープログラムをさらに小さくした所、下記でもエラーが発生しました。
+ このうち配列mpi_sample_ave_matをポインターでなく
+ 配列宣言に変えたところ(下記の正常プログラム)、エラーは起こらなくなりました。
+ ただし、オリジナルプログラムでこの部分だけを直しても、エラーは消えませんでした。
+ Ｃ言語は詳しくないですが、これから原因が分かりますか？
+
+ ■エラープログラムと正常プログラムの異なる部分
+
+ 14c14
+ <       float **mpi_sample_ave_mat;
+ ---
+  >       //float **mpi_sample_ave_mat;
+ 28c28,29
+ <       mpi_sample_ave_mat = f_calloc_mat(4,4);
+ ---
+  >       //mpi_sample_ave_mat = f_calloc_mat(4,4);
+  >       float mpi_sample_ave_mat[4][4];
+
+ ■エラープログラム
+
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <mpi.h>
+ #include "/home/amano/include/alloc.c"
+ #include "/home/amano/include/data_read.c"
+ #include "/home/amano/include/math_base.c"
+
+ int main(int argc, char **argv){
+          int i,j;
+          int mpi_rank;
+          int mpi_size;
+          float *mpi_sample_ave_vec;
+          float **mpi_sample_ave_mat;
+          int *mpi_reccount_list;
+          int *mpi_displs;
+
+          MPI_Status status;
+          MPI_Init(&argc, &argv);
+          MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+          MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+          mpi_reccount_list = i_alloc_vec(4);
+          mpi_displs = i_alloc_vec(4);
+
+        int mpi_sample_dim = 4;
+          mpi_sample_ave_vec = f_calloc_vec(4);
+          mpi_sample_ave_mat = f_calloc_mat(4,4);
+
+          for(i=0;i<4;i++){
+                  mpi_reccount_list[i] = 4;
+          }
+          for(i=0;i<4;i++){
+                  mpi_displs[i] = i*4;
+          }
+          MPI_Allgatherv(mpi_sample_ave_vec,4,MPI_FLOAT,mpi_sample_ave_mat,mpi_reccount_list,mpi_displs,MPI_FLOAT,MPI_COMM_WORLD);
+          for(i=0;i<4;i++){
+                  for(j=0;j<4;j++){
+                          mpi_sample_ave_mat[i][j];
+                  }
+          }
+
+          MPI_Finalize();
+
+ }
+
+ ■正常プログラム
+
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <mpi.h>
+ #include "/home/amano/include/alloc.c"
+ #include "/home/amano/include/data_read.c"
+ #include "/home/amano/include/math_base.c"
+
+ int main(int argc, char **argv){
+          int i,j;
+          int mpi_rank;
+          int mpi_size;
+          float *mpi_sample_ave_vec;
+          //float **mpi_sample_ave_mat;
+          int *mpi_reccount_list;
+          int *mpi_displs;
+
+          MPI_Status status;
+          MPI_Init(&argc, &argv);
+          MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+          MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+          mpi_reccount_list = i_alloc_vec(4);
+          mpi_displs = i_alloc_vec(4);
+
+        int mpi_sample_dim = 4;
+          mpi_sample_ave_vec = f_calloc_vec(4);
+          //mpi_sample_ave_mat = f_calloc_mat(4,4);
+          float mpi_sample_ave_mat[4][4];
+
+          for(i=0;i<4;i++){
+                  mpi_reccount_list[i] = 4;
+          }
+          for(i=0;i<4;i++){
+                  mpi_displs[i] = i*4;
+          }
+          MPI_Allgatherv(mpi_sample_ave_vec,4,MPI_FLOAT,mpi_sample_ave_mat,mpi_reccount_list,mpi_displs,MPI_FLOAT,MPI_COMM_WORLD);
+          for(i=0;i<4;i++){
+                  for(j=0;j<4;j++){
+                          mpi_sample_ave_mat[i][j];
+                  }
+          }
+
+          MPI_Finalize();
+
+ }
+
+
+ -------- End of Original Message --------
+
+ /**********************************
+  独立行政法人理化学研究所筑波研究所
+  バイオリソースセンター 情報解析技術室
+  天野　晃 (AMANO, Kou)
+  〒305-0074 茨城県つくば市高野台3-1-1
+  Tel(研究室代表): 029-836-9115
+  内線: 8304
+  e-mail: amano@brc.riken.jp
+  URL:http://www.brc.riken.jp/
+  BRC内部より当室への連絡は、
+
+=============================2============================
+----------- Original Message ------------
+ Subject: Re: MPI_Allgatherv() の行列
+Date: Wed, 21 Sep 2011 13:44:53 +0900
+ From: Yukiya Aoyama <@riken.jp>
+ To: amano <amano@brc.riken.jp>
+ Cc:
+
+
+
+ 天野様
+
+以前CUDAの講習会に出席した人が、
+ MPIで、Cのmallocで確保した2次元配列の通信をしたことがあると言っていたので、
+ その人に問い合わせたところ、下記の回答が来ましたので転送します。
+ ざっと見たところ、天野さんの方法と同じであるような気もします。
+
+ （ここから）-----------------------------------------------------
+
+ まずは，私が動的に確保した多次元配列の通信がうまくいかなくて
+ 同僚に相談したときに紹介してもらったホームページのURLを添付します．
+ （申し訳ございません，皆さんが参照されるようなちゃんとしたページか
+ 　どうかはわかりません．）
+
+http://handasse.blogspot.com/2009/02/cc.html
+
+ 以下に上記のホームページのコードを参考にして，
+ 実際に動作確認をした
+ （少しだけ私が用いているパラメータが入っていますが，
+ ご使用のパラメータに置き換えていただけると幸いです）
+ コードを添付します．
+ MPIの基本的なおまじない等は省略しています．
+ あと，他にもいい方法があるかもしれないので，
+ そこについては，カバーできていないことを最初に
+ お詫びさせてください．
+
+ うまく動作しなかったり，間違いがありましたら
+ ご指摘いただければ幸いです．
+
+ 基本的な考え方は，
+ （１）連続した領域にメモリを確保
+ （２）連続領域にメモリを確保した後に，ポインタの配列それぞれが
+ 　　　連続領域のどこを指せばよいか，ポインタで指し直す
+ です．
+ サンプルコードでは，
+ ｎ*mの配列を確保しようとしています
+
+          int n = 200;
+          int m = 200;
+          double **e, **recv_e;
+          //ポインタの配列を確保
+          //今回はn個分
+          e = (double **)malloc(n * sizeof(double *));
+          if(e == NULL){
+                  printf("メモリが確保できないので強制終了\n");
+                  exit(1);
+          }
+          //確保した0番目のポインタで，確保したい2次元配列のために必要な
+          //メモリを連続して確保
+          //今回であれば，n * m個分
+          //並列処理を考えない場合は，確保したそれぞれのポインタに対して
+          //メモリを確保するように書くことが多い
+          //例えば，forループでそれぞれのポインタにm個
+          //だけdouble型のメモリを確保していくように書く
+          //for(int i = 0;i < n;i++){
+          //      e[i] = (double *)malloc(m * sizeof(double));
+          //}
+          //そのようにすると，2次元配列のメモリが連続領域に確保されること
+          //が保証されないため，segmentation fault等でうまく通信できない
+
+          e[0] = (double *)malloc(n * m * sizeof(double));
+          if(e[0] == NULL){
+                  printf("メモリが確保できないので強制終了\n");
+                  exit(1);
+          }
+          //このままでは，0番目のポインタから2次元配列に必要なメモリを
+          //連続して確保したに過ぎないので，確保した連続領域の中で，
+          //確保したポインタがどこを指せばよいか，指定する．
+          //（2次元配列として扱えるようにm個飛びでさす）
+          for(int i = 1;i < n;i++)
+                  e[i] = e[0] + i * m;
+
+          //以下の処理は，eと同じ
+          recv_e = (double **)malloc(n * sizeof(double *));
+          if(recv_e == NULL){
+                  printf("メモリが確保できないので強制終了\n");
+                  exit(1);
+          }
+          recv_e[0] = (double *)malloc(n * m * sizeof(double));
+          if(recv_e[0] == NULL){
+                  printf("メモリが確保できないので強制終了\n");
+                  exit(1);
+          }
+          for(int i = 0;i < n;i++)
+                  recv_e[i] = recv_e[0] + i * (int)m;
+
+          for(int i = 0;i < n;i++){
+                  for(int j = 0;j < m;j++){
+                          e[i][j] = 0.000;
+                          recv_e[i][j] = 0.000;
+                  }
+          }
+
+          並列処理（割愛）
+
+          MPI_Reduce(&e[0][0], &recv_e[0][0], n * m, MPI_DOUBLE,
+MPI_MAX, root,
+ MPI_COMM_WORLD);
+
+
+
+
+
+
+
+ -------- End of Original Message --------
+
+ /**********************************
+  独立行政法人理化学研究所筑波研究所
+  バイオリソースセンター 情報解析技術室
+  天野　晃 (AMANO, Kou)
+  〒305-0074 茨城県つくば市高野台3-1-1
+  Tel(研究室代表): 029-836-9115
+  内線: 8304
+  e-mail: amano@brc.riken.jp
+  URL:http://www.brc.riken.jp/
+  BRC内部より当室への連絡は、
+ **********************************/
+
+====================3=========================
+----------- Original Message ------------
+ Subject: Re: MPI_Allgatherv()の行列
+Date: Wed, 21 Sep 2011 13:12:45 +0900
+ From: amano <amano@brc.riken.jp>
+ To: Yukiya Aoyama <@riken.jp>
+ Cc: ACCC High Performance Computing group <hpc@riken.jp>
+
+
+ hhhさま
+
+ 天野です。
+
+ > MPIでは、ポインタの使い方が、違ってくるようですね。
+ > もとのプログラムでは、メモリをアロケートした後、
+ > その配列にアクセスしているのですが(line 126-130)、
+ > この時点ではエラーが出ません。MPI通信を行ったあと、
+ > もういちどこの配列にアクセスする(line 138-142)と
+ > エラーが起こることから、MPIの関数が配列情報
+ > (ポインタのポインタ)を正しく解釈せず、もとの配列を
+ > 壊してしまっていることが伺えます。
+ >
+ > ポインタを一階層使うだけならうまく行われており(前回のメールの件)、
+ > ポインタを入れ子にして利用する場合に工夫が必要と思われます。
+ 自分の説明を再度読むと(そして、この説明が正しいとすると)、
+ ポインタの指定の仕方が違っていることに気がつきました。
+
+ MPI_Allgatherv(mpi_sample_ave_vec,4,MPI_FLOAT,mpi_sample_ave_mat,mpi_reccount_list,mpi_displs,MPI_FLOAT,MPI_COMM_WORLD);
+ でなく、正しくは、
+ MPI_Allgatherv(mpi_sample_ave_vec,4,MPI_FLOAT,mpi_sample_ave_mat[0],mpi_reccount_list,mpi_displs,MPI_FLOAT,MPI_COMM_WORLD);
+ でした。
+
+ 結局、私の単純なミスだったようで、これで、
+ エラーはなくなりましたが、思い通りに動いているかは、
+ もう少し調査しないと解りません。
+
+
+ >
+ > 青山様
+ >
+ > 天野です。
+ >
+ > 調査ありがとうございました。
+>
+ >
+ >
+ >> 天野様
+ >>
+ >> エラープログラムをさらに小さくした所、下記でもエラーが発生しました。
+ >> このうち配列mpi_sample_ave_matをポインターでなく
+ >> 配列宣言に変えたところ(下記の正常プログラム)、エラーは起こらなくなりまし
+ >> た。
+ >> ただし、オリジナルプログラムでこの部分だけを直しても、エラーは消えません
+ >> でした。
+ >> Ｃ言語は詳しくないですが、これから原因が分かりますか？
+ >
+> MPIでは、ポインタの使い方が、違ってくるようですね。
+ > もとのプログラムでは、メモリをアロケートした後、
+ > その配列にアクセスしているのですが(line 126-130)、
+ > この時点ではエラーが出ません。MPI通信を行ったあと、
+ > もういちどこの配列にアクセスする(line 138-142)と
+ > エラーが起こることから、MPIの関数が配列情報
+ > (ポインタのポインタ)を正しく解釈せず、もとの配列を
+ > 壊してしまっていることが伺えます。
+ >
+ > ポインタを一階層使うだけならうまく行われており(前回のメールの件)、
+ > ポインタを入れ子にして利用する場合に工夫が必要と思われます。
+ > この点、なにか、ノウハウはないのでしょうか。
+ >
+ > ちなみに、
+>>   >  //mpi_sample_ave_mat = f_calloc_mat(4,4);
+ >>   >  float mpi_sample_ave_mat[4][4];
+> この違いですが、近代的なCコンパイラでは、
+ > どちらも、同じように使えるよに解釈してくれ、
+ > ユーザには単なるシンタックスシュガーとして認識されます。
+ > ところが実際には、f_calloc_mat(4,4)は、
+ > (ポインタが複数宣言されているので、)分断された
+ > 配列領域(サイズ:4*4)とポインタ(サイズ:1+4)
+ > の分の領域が動的に確保されるのに対し、
+ > [4][4]では、サイズ16の(少なくともユーザからは)
+ > 連続的に見える領域が静的に確保されます。
+ >
+ > このことは、それぞれの変数のsizeof()を
+ > 調べれば推測できます。
+ > /home/amano/src1/sizeof
+ > (ソース:sizeof.c)
+ > を実行してみて下さい。
+ >
+ > 今回のことでMPIの挙動が推測できたのは大きいです。
+ > 私は私で回避法を考えますが、ポインタを入れ子で使う際
+ > のノウハウがあれば、教えて頂くと幸いです。
+ >
+ > よろしくお願いいたします。
+/*******************************************************
+ * 理化学研究所 バイオリソースセンター 情報解析技術室   *
+ * 天野晃 (あまのこう) <amano@brc.riken.jp>             *
+ * 電話: 029-836-9115 (研究室代表)                      *
+ * 内線: 8304                                           *
+ *******************************************************/
+============================4=================================
+----------- Original Message ------------
+ Subject: Re: MPI_Allgatherv()の行列
+Date: Wed, 21 Sep 2011 15:31:40 +0900
+ From: amano <amano@brc.riken.jp>
+ To: Yukiya Aoyama <@riken.jp>
+ Cc:
+
+
+hhh様
+
+ 返信ありがとうございます。
+
+ > 基本的な考え方は，
+ > （１）連続した領域にメモリを確保
+ > （２）連続領域にメモリを確保した後に，ポインタの配列それぞれが
+ >　　　 連続領域のどこを指せばよいか，ポインタで指し直す
+私のプログラムも、もとより、それができるように設計されて
+ いるのですが、使い方を間違っていたようです。
+ #現在、検証中
+> e[i] = e[0] + i * m;
+この部分を私は以下のようにしています(同じはずです)。
+ e[i] = e[i-1] + m
+
+ 教えて頂いた方法でうまく行きそうですね。
+===========================5=========================
+----------- Original Message ------------
+ Subject: Re: MPI_Allgatherv()の行列
+Date: Thu, 22 Sep 2011 10:11:21 +0900
+ From: amano <amano@brc.riken.jp>
+ To: Yukiya Aoyama <@riken.jp>
+ Cc:
+
+
+ hhh様
+
+天野です。
+
+ e は行列で、recv_e も行列ですよね?
+ 私のコードでは( e にあたる) mpi_sample_ave_vec はベクトルですが、
+ ( recv_e にあたる) mpi_sample_ave_mat は同じく行列です。その分、
+ コードに違いが出てくると思いますが、配列の先頭のアドレスを
+ 渡していることには違いないはずです。
+
+ それと、mpi_sample_mat[0 ] と &mpi_sample_ave_mat[0][0] は、
+ 同じ結果になると思います。&xxx[0][0] は xxx[0][0] のアドレスで、
+ これは、xxx[0] に格納されているので。あとで、試してみます。
+
+ ということでよろしいでしょうか。
+
+
+ 追伸:
+ 本来、ポインタアクセスに関しては*を利用して、その値を
+ 取り出すべきでしょうが、多くのコンパイラで添字表現が
+ 許されているようです。
+ 逆(配列に対するポインタアクセス風の表現)は、
+ できないはずです(試してませんが)。
+
+
+
+
+ > 天野様
+ >
+ > ,１点不明な点があります。
+ >
+ > 下記の&e[0][0]と、mpi_sample_mat[0]というのは同じ意味ですか？
+>
+ >> > MPI_Reduce(&e[0][0], &recv_e[0][0], n * m, MPI_DOUBLE, MPI_MAX,
+ >> > root,
+ >> > MPI_COMM_WORLD);
+ >
+>  >MPI_Allgatherv(mpi_sample_ave_vec,4,MPI_FLOAT,mpi_sample_ave_mat[0],mpi_reccount_list,mpi_displs,MPI_FLOAT,MPI_COMM_WORLD);
+ >
+ > それから、この使い方がMPIの仕様書に載っているかどうか分かりませんが、
+ > もし載っていない場合は、MPＩの実装によってはうまくいかないかも知れませ
+ > ん。、
+
+
+>
+ >
+ >
+
+
+ --
+ /*******************************************************
+ * 理化学研究所 バイオリソースセンター 情報解析技術室   *
+ * 天野晃 (あまのこう) <amano@brc.riken.jp>             *
+ * 電話: 029-836-9115 (研究室代表)                      *
+ * 内線: 8304                                           *
+ *******************************************************/
+ -------- End of Original Message --------
+
+ /**********************************
+  独立行政法人理化学研究所筑波研究所
+  バイオリソースセンター 情報解析技術室
+  天野　晃 (AMANO, Kou)
+  〒305-0074 茨城県つくば市高野台3-1-1
+  Tel(研究室代表): 029-836-9115
+  内線: 8304
+  e-mail: amano@brc.riken.jp
+  URL:http://www.brc.riken.jp/
+ **********************************/
+
+============================6=================================
+----------- Original Message ------------
+ Subject: Re: MPI_Allgatherv()の行列
+Date: Thu, 22 Sep 2011 13:25:16 +0900
+ From: amano <amano@brc.riken.jp>
+ To: Yukiya Aoyama <@riken.jp>
+ Cc:
+
+hhhさま
+
+ 天野です。
+ > それと、mpi_sample_mat[0 ] と&mpi_sample_ave_mat[0][0] は、
+> 同じ結果になると思います。&xxx[0][0] は xxx[0][0] のアドレスで、
+ > これは、xxx[0] に格納されているので。あとで、試してみます。
+同じ結果になりました。
+
+
+ >
+ > 青山様
+ >
+ > 天野です。
+ >
+ > e は行列で、recv_e も行列ですよね?
+ > 私のコードでは( e にあたる) mpi_sample_ave_vec はベクトルですが、
+ > ( recv_e にあたる) mpi_sample_ave_mat は同じく行列です。その分、
+ > コードに違いが出てくると思いますが、配列の先頭のアドレスを
+ > 渡していることには違いないはずです。
+ >
+> それと、mpi_sample_mat[0 ] と&mpi_sample_ave_mat[0][0] は、
+> 同じ結果になると思います。&xxx[0][0] は xxx[0][0] のアドレスで、
+ > これは、xxx[0] に格納されているので。あとで、試してみます。
+ >
+ > ということでよろしいでしょうか。
+ >
+ >
+ > 追伸:
+ > 本来、ポインタアクセスに関しては*を利用して、その値を
+ > 取り出すべきでしょうが、多くのコンパイラで添字表現が
+ > 許されているようです。
+ > 逆(配列に対するポインタアクセス風の表現)は、
+ > できないはずです(試してませんが)。
+ >
+ >
+ >
+ >
+ >> 天野様
+ >>
+ >> ,１点不明な点があります。
+ >>
+ >> 下記の&e[0][0]と、mpi_sample_mat[0]というのは同じ意味ですか？
+ >>
+>>>> MPI_Reduce(&e[0][0],&recv_e[0][0], n * m, MPI_DOUBLE, MPI_MAX,
+>>>> root,
+
+
+>>>> MPI_COMM_WORLD);
+ >>
+ >>   >MPI_Allgatherv(mpi_sample_ave_vec,4,MPI_FLOAT,mpi_sample_ave_mat[0],mpi_reccount_list,mpi_displs,MPI_FLOAT,MPI_COMM_WORLD);
+ >>
+ >> それから、この使い方がMPIの仕様書に載っているかどうか分かりませんが、
+ >> もし載っていない場合は、MPＩの実装によってはうまくいかないかも知れませ
+ >> ん。、
+ >>
+ >>
+ >>
+ >
+ >
+
+
+ --
+ /*******************************************************
+ * 理化学研究所 バイオリソースセンター 情報解析技術室   *
+ * 天野晃 (あまのこう) <amano@brc.riken.jp>             *
+ * 電話: 029-836-9115 (研究室代表)                      *
+ * 内線: 8304                                           *
+ *******************************************************/
+ -------- End of Original Message --------
+
+ /**********************************
+  独立行政法人理化学研究所筑波研究所
+  バイオリソースセンター 情報解析技術室
+  天野　晃 (AMANO, Kou)
+  〒305-0074 茨城県つくば市高野台3-1-1
+  Tel(研究室代表): 029-836-9115
+  内線: 8304
+  e-mail: amano@brc.riken.jp
+  URL:http://www.brc.riken.jp/
+ **********************************/
+

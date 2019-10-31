@@ -1,0 +1,191 @@
+----------- Original Message ------------
+ Subject: Re: feof()
+ Date: Thu, 18 Aug 2011 19:58:30 +0900
+ From: ACCC High Performance Computing group <hpc@riken.jp>
+ To: amano@brc.riken.jp
+ Cc:
+
+ 天野様 (アカウント名: amano)
+
+ 情報基盤センター SE のxxです。
+ ご回答が遅くなり、申し訳ありません。
+
+ MPI_File_open() したファイルポインタに対し、feof(),ferror() は
+ 動作しません。feof(),ferror() は FILE 型ですが、
+ MPI_File_open() は MPI_File 型であり、異なる関数となります。
+ (8/11 ご回答済み)
+
+ MPI_File_open() したファイルを Read する関数として、
+ MPI_File_read() などの関数が用意されています。
+ MPI_IO では複数の rank から 1 つのファイルに対し、read/write するため、
+ rank 毎に seek して読み出し位置を変更する必要があります。
+ そのため、MPI_File_read() では EOF ではなく、
+ MPI_Get_count() で読み込んだデータの個数を比較することで、
+ 意図したデータを正しく読み込んだかどうか、
+ プログラム内でチェックする必要があります。
+
+ 下図の例では、p0-p3までの 4 プロセスが 1 つのファイル(target.txt)を
+ 読み込みますが、EOF にたどり着くのは p3 だけとなり、p0-p2 では EOF を
+ 判定できません。
+           ┌─┐┌─┐┌─┐┌─┐
+           │p0││p1││p2││p3│
+           └─┘└─┘└─┘└─┘
+           │    │    │    │MPI_File_reed()
+           │    │    │    │
+           ↓    ↓    ↓    ↓
+           ┌──┬──┬──┬──┐
+ target.txt│    │    │    │    │EOF
+           └──┴──┴──┴──┘
+
+ MPI-IO で EOF を検出するためのサンプルプログラムと実行例について、
+ 参考までに添付いたします。
+ 添付の mpiio_samp.tar.gz には、以下の 3 ファイルが含まれています。
+
+ File_write_read.c : ファイル入出力のサンプルプログラム
+ File_read.c       : EOF 検出サンプルプログラム
+ test.data         : File_read.c 用インプットファイル
+
+
+ 以下に、サンプルプログラムの実行例を示します。
+
+ [user@ricc1 ~]$ cat File_write_read.c
+ //
+ // Test MPI_File_read
+ //
+ #include <stdio.h>
+ #include "mpi.h"
+
+ #define F_LEN 1000
+
+ int main(int argc, char *argv[])
+ {
+
+     MPI_File fh;
+     MPI_Offset pt;
+     MPI_Status status;
+     MPI_Info info;
+     int i;
+     int ret;
+     int count;
+     int buf[F_LEN];
+     int Rank_world, Size_world;
+     char filename[10] = "test.data";
+
+     ret = MPI_Init(&argc, &argv);
+     ret = MPI_Comm_rank(MPI_COMM_WORLD, &Rank_world);
+     ret = MPI_Comm_size(MPI_COMM_WORLD, &Size_world);
+
+     pt = Rank_world * F_LEN * sizeof(int);
+
+     for (i=0;i<F_LEN;i++) {
+         buf[i] = Rank_world;
+     }
+     MPI_File_delete(filename, info);
+     MPI_File_open(MPI_COMM_WORLD, filename,
+MPI_MODE_CREATE+MPI_MODE_WRONLY,
+ MPI_INFO_NULL, &fh);
+ //  MPI_File_seek(fh, Rank_world*F_LEN*4, MPI_SEEK_SET );
+     MPI_File_set_view(fh, pt, MPI_INT, MPI_INT, "native",
+MPI_INFO_NULL);
+     MPI_File_write(fh, buf, F_LEN, MPI_INTEGER, &status);
+     MPI_Barrier(MPI_COMM_WORLD);
+     MPI_File_sync(fh);
+     MPI_File_close(&fh);
+
+     MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY,
+MPI_INFO_NULL,
+ &fh);
+     MPI_File_set_view(fh, pt, MPI_INT, MPI_INT, "native",
+MPI_INFO_NULL);
+
+     ret = MPI_File_read(fh, &buf, F_LEN, MPI_INT, &status);
+ //  for(i=0;i<F_LEN;i++){
+ //      printf("buf[%d]=%d\n",i,buf[i]);
+ //  }
+     if (ret != MPI_SUCCESS) {
+         fprintf(stderr, "Error: MPI_File_read ret=%d\n", ret);
+         fflush(stderr);
+     }
+
+     ret = MPI_Get_count(&status, MPI_INT, &count);
+     if (count != F_LEN) {
+         fprintf(stderr, "MPI_File_read ret=%d count=%d F_LEN=%d
+Error\n",
+                 ret, count, F_LEN);
+         fflush(stderr);
+     } else {
+         fprintf(stderr, "MPI_File_read ret=%d count=%d F_LEN=%d\n",
+ret,
+                 count, F_LEN);
+         fflush(stderr);
+     }
+
+     MPI_File_close(&fh);
+     MPI_Finalize();
+
+     return 0;
+ }
+ [user@ricc1 ~]$ mpicc -pc File_write_read.c
+ [user@ricc1 ~]$ mpirun -np 4 -oa ./a.out
+ [1] MPI_File_read ret=0 count=1000 F_LEN=1000
+ [0] MPI_File_read ret=0 count=1000 F_LEN=1000
+ [2] MPI_File_read ret=0 count=1000 F_LEN=1000
+ [3] MPI_File_read ret=0 count=1000 F_LEN=1000
+ [user@ricc1 ~]$ od test.data
+ 0000000 000000 000000 000000 000000 000000 000000 000000 000000
+ *
+ 0007640 000001 000000 000001 000000 000001 000000 000001 000000
+ *
+ 0017500 000002 000000 000002 000000 000002 000000 000002 000000
+ *
+ 0027340 000003 000000 000003 000000 000003 000000 000003 000000
+ *
+ 0037200
+ [user@ricc1 ~]$ mpicc -pc File_read.c
+ [user@ricc1 ~]$ mpirun -np 4 -oa ./a.out
+ [0] MPI_File_read ret=0 count=1000 F_LEN=1000
+ [3] MPI_File_read ret=0 count=1000 F_LEN=1000
+ [2] MPI_File_read ret=0 count=1000 F_LEN=1000
+ [1] MPI_File_read ret=0 count=1000 F_LEN=1000
+ [user@ricc1 ~]$ mpirun -np 5 -oa ./a.out
+ [0] MPI_File_read ret=0 count=1000 F_LEN=1000
+ [3] MPI_File_read ret=0 count=1000 F_LEN=1000
+ [1] MPI_File_read ret=0 count=1000 F_LEN=1000
+ [4] MPI_File_read ret=0 count=0 F_LEN=1000 Error
+ [2] MPI_File_read ret=0 count=1000 F_LEN=1000
+
+ 4 プロセスで実行した場合、エラーは発生しませんが、
+ 5 プロセスで実行した場合、入力ファイルのデータ不足(EOF)
+が確認できます。
+
+ 以上、よろしくお願いいたします。
+
+ > 情報基盤センター御中
+ >
+ > BRC　天野と申します。
+ > MPI_File_openしたファイル(ポインタ)に対して、
+ > feof()や、ferror()を使っても正常に処理しますか?
+ > あるいは、MPI用の同様の関数が用意されているのでしょうか。
+ > 要は、EOFの判定を行いたいのですが。
+ >
+ > よろしくお願いいたします。
+ >
+ > --
+ > /*******************************************************
+ > * 理化学研究所 バイオリソースセンター 情報解析技術室   *
+ > * 天野晃 (あまのこう) <amano@brc.riken.jp>             *
+ > * 電話: 029-836-9115 (研究室代表)                      *
+ > * 内線: 8304                                           *
+ > *******************************************************/
+ >
+ >
+
+
+ --
+ Advanced Center for Computing and Communication
+ RIKEN (The Institute of Physical and Chemical Research)
+
+ 2011/8/17
+ -------- End of Original Message --------
+
+ 

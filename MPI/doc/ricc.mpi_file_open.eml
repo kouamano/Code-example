@@ -1,0 +1,255 @@
+=======================1========================
+----------- Original Message ------------
+ Subject: Re: MPI_File_open()
+ Date: Wed, 10 Aug 2011 10:41:53 +0900
+ From: amano <amano@brc.riken.jp>
+ To: ACCC High Performance Computing group <hpc@riken.jp>
+ Cc: amano@rtc.riken.jp
+
+
+ uu様
+
+ 天野です。
+
+ コンパイル/実行を確認しました。
+ ありがとうございました。
+
+ fopen()とは使い方が違うのですね。
+ 他にも同じようなものがありそうで、
+ 難儀しそうです。
+
+ > MPI_File 型のポインタではなく MPI_File 型として宣言して下さい。
+ ちなみに、まだ試していませんが、ポインタで宣言した後、
+ ポインタの先の領域を確保すればうまく行くということなのでしょうか?
+
+
+ 今後とも、よろしくお願いいたします。
+
+
+ > 天野様 (アカウント名: amano)
+ >
+ > 情報基盤センターSE xxです。
+ >
+ > pread_test.c にて変数 mpi_fp を宣言されていますが、
+ > MPI_File 型のポインタではなく MPI_File 型として宣言して下さい。
+ > それに伴い、MPI_File_open 関数、MPI_File_close 関数の
+ > 引数で指定しているファイルハンドルを以下のように修正して下さい。
+ >
+ > === ここから ===
+ > #include<stdio.h>
+ > #include<stdlib.h>
+ > #include<string.h>
+ > #include<mpi.h>
+ >
+ > int main(int argc, char **argv){
+ >          int mpi_rank;
+ >          int mpi_size;
+ >          MPI_File mpi_fp;   // 修正
+ >          printf("pread_test\n");
+ >          MPI_Init(&argc,&argv);
+ >          MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+ >          MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+ >
+ >          //MPI_File_open(MPI_COMM_WORLD, argv[1], MPI_MODE_RDONLY,
+ >          MPI_INFO_NULL,
+ > mpi_fp);
+ >          MPI_File_open(MPI_COMM_WORLD, "pread_target.txt",
+ >          MPI_MODE_RDONLY,
+ > MPI_INFO_NULL,&mpi_fp); // 修正
+ >          printf("mpi_fp:%d:\n",mpi_fp);
+ >          MPI_File_close(&mpi_fp); // 修正
+ >
+ >          printf("rank:%d:\n",mpi_rank);
+ >          printf("size:%d:\n",mpi_size);
+ >
+ >          MPI_Finalize();
+ >
+ >          return(0);
+ > }
+ > === ここまで ===
+ >
+ > 上記プログラムのコンパイル・リンク、バッチジョブでの実行結果を
+ > 以下に添付します。
+ >
+ > 1. コンパイル・リンク
+ >
+ > [username@ricc1 ~]$ mpicc -pc pread_test.c -o pread_test
+ >
+ > 2．バッチジョブ投入
+ >
+ > [username@ricc1 ~]$ qsub MPI_submit_pread_test.exe
+ > Request 5669269.jms submitted to MJS.
+ >
+ > 3．実行結果確認
+ >
+ > [username@ricc1 ~]$ ls -l MPI_sub.*5669269.jms pread_test.out
+ > -rwxr-xr-x 1 username grpname   0 Aug  9 19:42 MPI_sub.e5669269.jms
+ > -rwxr-xr-x 1 username grpname   0 Aug  9 19:42 MPI_sub.o5669269.jms
+ > -rw-r--r-- 1 username grpname 180 Aug  9 19:42 pread_test.out
+ > [username@ricc1 ~]$ more pread_test.out
+ > pread_test
+ > mpi_fp:129287488:
+ > rank:0:
+ > size:4:
+ > pread_test
+ > mpi_fp:288652224:
+ > rank:1:
+ > size:4:
+ > pread_test
+ > mpi_fp:131898304:
+ > rank:2:
+ > size:4:
+ > pread_test
+ > mpi_fp:410975168:
+ > rank:3:
+ > size:4:
+ >
+ > 尚、超並列 PC クラスタでは、FTL によるファイルステージングにより
+ > 計算ノードのローカルディスクに対して I/O を行うことになりますが、
+ > 各計算ノード同士のローカルディスクは共有されていません。
+ > そのため、ノードを跨ぐ並列実行で MPI-IO を行う場合は
+ > 多目的 PC クラスタをご利用下さい。
+ > 多目的 PC クラスタのみでバッチジョブを実行する場合、
+ > バッチジョブ投入時に -pc オプションの代わりに -upc
+ > オプションをご指定下さい。
+ >
+ > 以上、よろしくお願いいたします。
+ >
+ >> 情報基盤センター御中
+ >>
+ >> BRC　天野と申します。
+ >>
+ >> MPIについての質問です。
+ >>
+ >> MPI_File_open()の使いかたがわかりません。
+ >> コンパイルは通るのですが、実行時エラーとなります。
+ >> なにが問題なのか、私には解からず、解決を手助けいただければと思います。
+ >>
+ >> ソースコード: /home/amano/riccjob-examples/mpc/test/pread_test.c
+ >> read対象: /home/amano/riccjob-examples/mpc/test/pread_target.txt
+ >> サブミット(FTL)ファイル:
+ >> /home/amano/riccjob-examples/mpc/test/MPI_submit_pread_test.exe
+ >> エラーファイル:
+ >> /home/amano/riccjob-examples/mpc/test/MPI_sub.e5669220.jms
+ >> コンパイル:  mpicc -pc pread_test.c -o pread_test
+ >>
+ >> 以上、よろしくお願いいたします。
+ >>
+ >>
+ >> *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+ >> 天野　晃
+ >> 独立行政法人理化学研究所 筑波研究所
+ >> バイオリソースセンター 情報解析技術室
+ >> 〒305-0074 茨城県つくば市高野台3-1-1
+ >> Tel(研究室代表): 029-836-9115
+ >> 内線: 8304
+ >> e-mail: amano@brc.riken.jp
+ >> *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+ >>
+ >
+ >
+ > --
+ > Advanced Center for Computing and Communication
+ > RIKEN (The Institute of Physical and Chemical Research)
+ >
+ > 2011/8/9
+ >
+
+
+ --
+  -------- End of Original Message --------
+
+ =================================2==============================
+----------- Original Message ------------
+ Subject: Re: MPI_File_open()
+Date: Wed, 10 Aug 2011 17:24:39 +0900
+ From: ACCC High Performance Computing group <hpc@riken.jp>
+ To: amano@brc.riken.jp
+ Cc: amano@rtc.riken.jp
+
+ 天野様 (アカウント名: amano)
+
+ 情報基盤センターSE xxです。
+
+追加のご質問に回答いたします。
+ MPI_File 型でポインタ宣言した後、ポインタ先の領域を動的確保すれば
+ 問題ございません。
+
+ 以下、プログラム例です。
+ メモリの動的確保に失敗した際のエラー処理などは含まれていませんので
+ ご注意下さい。
+
+ [username@ricc1 ~]$ cat pread_test.c
+#include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <mpi.h>
+
+ int main(int argc, char **argv){
+         int mpi_rank;
+         int mpi_size;
+        MPI_File *mpi_fp;
+         mpi_fp = (MPI_File *)malloc(sizeof(MPI_File));
+        printf("pread_test\n");
+         MPI_Init(&argc,&argv);
+         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+         MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+         //MPI_File_open(MPI_COMM_WORLD, argv[1], MPI_MODE_RDONLY,
+         //MPI_INFO_NULL,
+ mpi_fp);
+         MPI_File_open(MPI_COMM_WORLD, "pread_target.txt",
+MPI_MODE_RDONLY,
+MPI_INFO_NULL, mpi_fp); // modify
+        printf("mpi_fp:%d:\n",mpi_fp);
+        MPI_File_close(mpi_fp); // modify
+
+         printf("rank:%d:\n",mpi_rank);
+         printf("size:%d:\n",mpi_size);
+
+         MPI_Finalize();
+
+         return(0);
+ }
+[username@ricc1 ~]$ mpicc -pc pread_test.c -o pread_test
+[username@ricc1 ~]$ mpirun -np 4 ./pread_test
+ pread_test
+ mpi_fp:72682544:
+rank:0:
+ size:4:
+ pread_test
+mpi_fp:509140016:
+ rank:3:
+ size:4:
+ pread_test
+ mpi_fp:15993904:
+rank:2:
+ size:4:
+ pread_test
+mpi_fp:14531632:
+ rank:1:
+ size:4:
+
+ また、別メールでご質問いただいた MPI プログラムでの
+ 標準出力への出力について回答いたします。
+ 天野様のご理解の通り、自動でバリア同期が取られることはありませんので、
+ 各ランクの出力順序は保証されません。
+ # 上記例では、ランク順に出力されていません。
+
+ 以上、よろしくお願いいたします。
+2011/8/10
+
+
+
+ -------- End of Original Message --------
+
+ /**********************************
+  独立行政法人理化学研究所筑波研究所
+  バイオリソースセンター 情報解析技術室
+  天野　晃 (AMANO, Kou)
+  〒305-0074 茨城県つくば市高野台3-1-1
+  Tel(研究室代表): 029-836-9115
+  内線: 8304
+  e-mail: amano@brc.riken.jp
+ **********************************/
+
