@@ -1,0 +1,9 @@
+#分散されたファイルを各ランクで読み込み、全体のcentroidを求めるプログラム
+#ファイル形式はSOC形式:
+-----ここからファイル形式-----
+<dim> <line>
+<var_1_1> <var_1_2> <var_1_3> ... <var_1_dim>
+<var_2_1> <var_2_2> <var_2_3> ... <var_2_dim>
+ ...
+<var_line_1> <var_line_2> <var_line_3> ... <var_line_dim>
+-----ここまで-----
