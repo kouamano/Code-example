@@ -1,0 +1,26 @@
+#!/bin/sh
+
+
+#FTL_STAT: detail
+#FTL_INFO: all
+
+
+#MJS: -pc
+#MJS: -proc 4
+#MJS: -thread 1
+#MJS: -cwd
+#MJS: -time 1:00:00
+
+
+#BEFORE: 0:mpi_checkargs,f.0
+#BEFORE: 1:mpi_checkargs,f.1
+#BEFORE: 2:mpi_checkargs,f.2
+#BEFORE: 3:mpi_checkargs,f.3
+
+
+#!<RUN>
+mpirun ./mpi_checkargs =${MJS_HOME}= =${MJS_DATA}= =${MJS_CWD}= =${MJS_REQID}= =${MPI_RANK}= =${XPF_RANK}= f > mpi_checkargs.out
+#!</RUN>
+
+
+#AFTER: mpi_checkargs.out

@@ -1,0 +1,10 @@
+FTLの変数を確認するプログラム。
+変数:
+<プログラム自身>
+$MJS_HOME
+$MJS_DATA
+$MJS_CWD
+$MJS_REQID
+$MPI_RANK
+$XPF_RANK
+<引数ファイル名>

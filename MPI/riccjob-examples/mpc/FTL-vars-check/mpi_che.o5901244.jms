@@ -1,0 +1,38 @@
+#======================  FTL STATISTICS INFOMATION  ===========================#
+-----------------------          BEFORE             ----------------------------
+                 ELAPSE(s)    FILE_NUM  FILE_SIZE(KB)
+--------------------------------------------------------------------------------
+TOTAL                    0           5             11
+RANK: 0-3                0           5             11
+
+-----------------------          AFTER              ----------------------------
+                 ELAPSE(s)    FILE_NUM  FILE_SIZE(KB)
+--------------------------------------------------------------------------------
+TOTAL                    0           1              1
+RANK: 0-3                0           1              1
+
+#==============================================================================#
+#======================     FTL FILE INFOMATION     ===========================#
+-----------------------          BEFORE             ----------------------------
+[RANK: 0-3]
+TIME              SIZE(KB) FILE_NAME
+--------------------------------------------------------------------------------
+Oct 14 13:14             0 /home/amano/riccjob-examples/mpc/FTL-vars-check/f.0
+Oct 14 13:14             0 /home/amano/riccjob-examples/mpc/FTL-vars-check/f.1
+Oct 14 13:14             0 /home/amano/riccjob-examples/mpc/FTL-vars-check/f.2
+Oct 14 13:14             0 /home/amano/riccjob-examples/mpc/FTL-vars-check/f.3
+Oct 14 14:05            11 /home/amano/riccjob-examples/mpc/FTL-vars-check/mpi_checkargs
+
+
+-----------------------          AFTER              ----------------------------
+[RANK: 0-3]
+TIME              SIZE(KB) FILE_NAME
+--------------------------------------------------------------------------------
+10月 14 13:14           0 /home/amano/riccjob-examples/mpc/FTL-vars-check/f.0
+10月 14 13:14           0 /home/amano/riccjob-examples/mpc/FTL-vars-check/f.1
+10月 14 13:14           0 /home/amano/riccjob-examples/mpc/FTL-vars-check/f.2
+10月 14 13:14           0 /home/amano/riccjob-examples/mpc/FTL-vars-check/f.3
+10月 14 14:05          11 /home/amano/riccjob-examples/mpc/FTL-vars-check/mpi_checkargs
+10月 14 14:08           1 /home/amano/riccjob-examples/mpc/FTL-vars-check/mpi_checkargs.out
+
+#==============================================================================#
