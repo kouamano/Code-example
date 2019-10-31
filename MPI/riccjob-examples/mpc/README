@@ -1,0 +1,11 @@
+FTL-multifile-test
+ : ランク別平ファイルの転送と読み取り
+
+FTL-vars-chek
+ : FTL変数($MJS...など)の値チェック
+
+minimal-test
+ : jobを投入できる最低限のバイナリ
+
+soc-convergence
+ : soc(non-mpi)に実行に最低限必要なFTL記述
