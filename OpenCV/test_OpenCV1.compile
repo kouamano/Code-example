@@ -1,0 +1,1 @@
+g++ test_OpenCV1.cpp -lopencv_core
