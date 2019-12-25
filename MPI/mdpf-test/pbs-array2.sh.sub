@@ -1,0 +1,15 @@
+#!/bin/bash
+#PBS -N mpi_large_MT
+#PBS -q large
+#PBS -l walltime=2:00:00
+#PBS -j oe
+#PBS -l select=4:ncpus=24:mpiprocs=2
+#PBS -J 1-10:1
+
+cd $PBS_O_WORKDIR
+#module load openmpi/gnu/3.1.3
+#OMP_NUM_THREADS=4
+#_NPROCS=`cat $PBS_NODEFILE | wc -l`
+#mpirun -n $_NPROCS ./mpithread
+pwd > /home/kamano/test/pwd.out.${PBS_ARRAY_INDEX}
+ls > /home/kamano/test/ls.out.${PBS_ARRAY_INDEX}
