@@ -1,0 +1,22 @@
+#!/bin/bash
+#PBS -N no_mpi_large
+#PBS -q large
+#PBS -l walltime=2:00:00
+#PBS -j oe
+##PBS -l select=4:ncpus=24:mpiprocs=2
+##PBS -J 20-32:1
+
+#cd $PBS_O_WORKDIR
+#cd /home/kamano/test
+cd /home/kamano/TEST_COLLECTION/Bibliometrics/JournalCitationClustering/kmeans-cosine
+#module load openmpi/gnu/3.1.3
+#OMP_NUM_THREADS=4
+#_NPROCS=`cat $PBS_NODEFILE | wc -l`
+#mpirun -n $_NPROCS ./mpithread
+#date > /home/kamano/test/${PBS_JOBID}_start
+#hostname > /home/kamano/test/${PBS_JOBID}_name.out.${PBS_ARRAY_INDEX} &
+#pwd > /home/kamano/test/${PBS_JOBID}_pwd.out.${PBS_ARRAY_INDEX} &
+/home/kamano/gitsrc/SOC/SOC_0.5.10-01/soc-lm sf=JCR_cited_2004_ZeroDeleteCopy.mat.sv cf=JCR_cited_2004_ZeroDeleteCopy.mat.cv.32-R > /home/kamano/test/${PBS_JOBID}_soc.log.32 &
+wait
+#ls > /home/kamano/test/${PBS_JOBID}_ls.out.${PBS_ARRAY_INDEX} &
+#date > /home/kamano/test/${PBS_JOBID}_end
