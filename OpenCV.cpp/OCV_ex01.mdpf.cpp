@@ -1,8 +1,8 @@
 #include <iostream>
 #include <stdio.h>
 
-#include <cv.h>
-#include <highgui.h>
+#include <opencv.hpp>
+#include <highgui.hpp>
 
 using namespace cv;
 using namespace std;
