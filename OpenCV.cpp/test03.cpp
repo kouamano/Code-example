@@ -1,7 +1,10 @@
-#include "stdlib.h"
-#include "stdio.h"
-#include <cv.h>
-#include <highgui.h>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <opencv.hpp>
+#include <highgui.hpp>
+#include <freetype.hpp>
+#include <imgproc/imgproc_c.h>
 using namespace cv;
 int main(){
     Mat img = Mat::zeros(500, 500, CV_8UC3);
