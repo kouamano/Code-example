@@ -1,1 +1,1 @@
-g++ -I/home/kamano/APP/OpenCV4/include/opencv4/opencv2/ -I/home/kamano/APP/OpenCV4/include/opencv4/ -lm OCV_ex01.mdpf.cpp -L/home/kamano/APP/OpenCV4/lib64/ -lopencv_core
+g++ --std=c++11 -I/home/kamano/APP/OpenCV4/include/opencv4/opencv2/ -I/home/kamano/APP/OpenCV4/include/opencv4/ -lm OCV_ex01.mdpf.cpp -L/home/kamano/APP/OpenCV4/lib64/ -lopencv_core
