@@ -1,0 +1,1 @@
+/usr/bin/g++ test_mdpf-01.cpp -o test-01.out  --std=c++11 -I/home/kamano/APP/OpenCV4/include/opencv4/opencv2/ -I/home/kamano/APP/OpenCV4/include/opencv4/ test01.cpp -L/home/kamano/APP/OpenCV4/lib64/ -lopencv_core
