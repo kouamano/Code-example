@@ -1,1 +1,1 @@
-g++ test_OpenCV1.cpp -lopencv_core
+g++ --std=c++11 -I/home/kamano/APP/OpenCV4/include/opencv4/opencv2/ -I/home/kamano/APP/OpenCV4/include/opencv4/ test01.cpp -L/home/kamano/APP/OpenCV4/lib64/ -lopencv_core
