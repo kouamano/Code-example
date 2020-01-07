@@ -1,7 +1,8 @@
 #include "stdlib.h"
 #include "stdio.h"
-#include "opencv/cv.h"
-#include "opencv/highgui.h"
+#include "opencv.hpp"
+/*#include "opencv/cv.h"*/
+/*#include "opencv/highgui.h"*/
 using namespace cv;
 int main(){
     Mat img = Mat::zeros(500, 500, CV_8UC3);
