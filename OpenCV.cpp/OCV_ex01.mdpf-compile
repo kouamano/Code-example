@@ -1,1 +1,0 @@
-g++ -I/home/kamano/APP/OpenCV4/include/opencv4/opencv2/ -I/home/kamano/APP/OpenCV4/include/opencv4/ -lm OCV_ex01.cpp -L/home/kamano/APP/OpenCV4/lib64/ -lopencv_core
