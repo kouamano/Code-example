@@ -1,13 +1,31 @@
 \documentclass[10pt]{article}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{fancyvrb}
+
+% redefine \VerbatimInput
+\RecustomVerbatimCommand{\VerbatimInput}{VerbatimInput}%
+{fontsize=\footnotesize,
+ %
+ frame=lines,  % top and bottom rule only
+ framesep=2em, % separation between frame and text
+ rulecolor=\color{Gray},
+ %
+ label=\fbox{\color{Black}data.txt},
+ labelposition=topline,
+ %
+ commandchars=\|\(\), % escape character and argument delimiters for
+                      % commands within the verbatim
+ commentchar=*        % comment character
+}
+
 \begin{document}
 Hello, \LaTeX.
 \\
 \input{|"echo 8*8 | wolframscript"}
 \\
-\input{verb.s}
 \\
 \input{|"echo 'Integrate[1/(x^3 - 1), x]' | wolframscript"}
 \\
-\input{verb.e}
+\VerbatimInput{|"echo 'Integrate[1/(x^3 - 1), x]' | wolframscript"}
 \end{document}
 
